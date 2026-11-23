@@ -1,4 +1,4 @@
-# MySTRA — Malaysia Short-Term Rental Accommodation system
+﻿# MySTRA â€” Malaysia Short-Term Rental Accommodation system
 
 Coursework project for **Collaborative Development**. A browser-based system that lets
 short-term rental hosts register their properties and keep their compliance documents in one
@@ -39,6 +39,13 @@ python -m http.server 8080
 
 then open `http://localhost:8080/index.html`. Supabase keys live in `supabase-config.js`;
 replace them with your own project's values before running against a real backend.
+
+## My contribution
+
+I built the **government admin side**: the review queue (inspect a PENDING submission,
+approve or reject it), the audit log that records each admin decision, the reports and
+feedback pages, and the session guard on every admin page. The host portal and the legacy
+migration engine were built by my teammate.
 
 ## Note
 
