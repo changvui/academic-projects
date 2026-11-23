@@ -1,0 +1,22 @@
+﻿# reports are kept out of the public repo (they contain teammates' student IDs)
+reports/
+
+# model weights and checkpoints
+*.pth
+*.pt
+*.safetensors
+*.bin
+*.onnx
+*.ckpt
+checkpoint-*/
+
+# python / notebook clutter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.tfevents.*
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/

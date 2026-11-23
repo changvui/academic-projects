@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySTRA - Document Intake Portal</title>
+    
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="control-panel.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase Configuration & API Layer -->
+    <script src="supabase-config.js"></script>
+    <!-- document javascript -->
+    <script src="document.js" defer></script>
+    <script src="control-panel.js"></script>
+
+    <style>
+        /* ==============================================================================
+           MODULE 3 - DOCUMENT INTAKE PORTAL ADDITIONAL STYLES
+           ============================================================================== */
+
+        /* Status Badges */
+        .badge-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-approved {
+            background-color: #DCFCE7;
+            color: #15803D;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-rejected {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-revision {
+            background-color: #FED7AA;
+            color: #9A3412;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-replaced {
+            background-color: #E5E7EB;
+            color: #4B5563;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* GPS Status Styles */
+        #gps-status {
+            transition: all 0.3s ease;
+            border: 1px solid #E5E7EB;
+        }
+        #gps-status.within-zone {
+            border-color: #22C55E;
+            background-color: #F0FDF4;
+        }
+        #gps-status.outside-zone {
+            border-color: #EF4444;
+            background-color: #FEF2F2;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 560px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* File input styling */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        .file-input-wrapper input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #D1D5DB;
+            border-radius: 8px;
+            background: #F9FAFB;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .file-input-wrapper input[type="file"]:hover {
+            border-color: #2563EB;
+        }
+
+        /* Location Map Visual */
+        .map-visual {
+            background: #F1F5F9;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .geofence-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+        }
+        .geofence-container .outer-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px dashed #2563EB;
+            opacity: 0.3;
+        }
+        .geofence-container .inner-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #2563EB;
+            opacity: 0.15;
+            border: 2px solid #2563EB;
+        }
+        .geofence-container .property-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2563EB;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        .geofence-container .user-marker {
+            position: absolute;
+            top: 30%;
+            left: 70%;
+            background: #22C55E;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+            z-index: 3;
+        }
+        .geofence-container .user-marker.outside {
+            background: #EF4444;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6B7280;
+        }
+        .empty-state .icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+        .empty-state h3 {
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 4px;
+        }
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        /* Settings form */
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 450px;
+        }
+        .settings-form label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .settings-form input,
+        .settings-form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+        }
+
+        /* Document table action buttons */
+        .action-btn {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background: #E5E7EB;
+            color: #374151;
+            transition: background 0.2s;
+        }
+        .action-btn:hover {
+            background: #D1D5DB;
+        }
+        .action-btn.revise {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        .action-btn.revise:hover {
+            background: #FDE68A;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+                padding: 16px;
+            }
+            .sidebar-brand {
+                font-size: 14px;
+            }
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+            .main-content {
+                padding: 16px;
+            }
+            .token-card {
+                grid-template-columns: 1fr;
+            }
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portal-container">
+
+        <!-- ==========================================================================
+        🧭 LEFT SIDEBAR NAVIGATION
+        ========================================================================== -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">MySTRA Portal</div>
+            <ul class="nav-links">
+                <!-- Link back to Code Control Centre  -->
+                <li id="nav-home" class="nav-item" onclick="window.location.href='mystra-code-control.html';">
+                    <span class="icon">🏠</span> Home
+                </li>
+                <!-- Link to Code Manager  -->
+                <li id="nav-manager" class="nav-item" onclick="window.location.href='mystra-code-control.html';">
+                    <span class="icon">🔑</span> MySTRA Code Manager
+                </li>
+                <!-- Link to documents  -->
+                <li id="nav-docs" class="nav-item active-nav">
+                    <span class="icon">📄</span> Documents
+                </li>
+                <!-- Link back to Settings  -->
+                <li id="nav-settings" class="nav-item" onclick="window.location.href='mystra-settings.html';">
+                    <span class="icon">⚙️</span> Settings
+                </li>
+                <li id="nav-logout" class="nav-item" style="margin-top: 24px; color: #EF4444; cursor: pointer; border-top: 1px solid #E5E7EB; padding-top: 16px;">
+                    <span class="icon">🚪</span> Logout
+                </li>
+            </ul>
+            <!-- User Footer -->
+            <div class="sidebar-footer" style="margin-top:auto;padding-top:20px;border-top:1px solid #E5E7EB;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div id="footer-avatar" style="width:32px;height:32px;border-radius:50%;background:#2563EB;color:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">--</div>
+        <div style="flex:1;min-width:0;">
+            <div id="sidebar-username" style="font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading...</div>
+            <div id="sidebar-userbusiness" style="font-size:11px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading...</div>
+        </div>
+    </div>
+    <div id="sidebar-userstatus" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;display:inline-block;background:#FEF3C7;color:#92400E;">⏳ Loading...</div>
+</div>
+        </nav>
+
+        <!-- ==========================================================================
+        🖥️ MAIN WORKSPACE AREA
+        ========================================================================== -->
+        <main class="main-content">
+
+            <!-- ===== PAGE HEADER ===== -->
+            <header class="content-header">
+                <div class="header-title-wrapper">
+                    <h1 id="page-main-title">📂 Document Intake Portal</h1>
+                    <span id="db-status-badge" class="status-badge">🟡 CONNECTING TO SUPABASE...</span>
+                </div>
+                <!-- Breadcrumb / Quick Action -->
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <span style="font-size: 13px; color: #6B7280;">Home / Documents</span>
+
+
+
+                    <button class="tab-btn active" onclick="window.location.href='mystra-document-portal.html'" style="padding: 8px 16px; font-size: 13px;">
+                        📤 Upload
+                    </button>
+                </div>
+            </header>
+
+            <!-- ===== DOCUMENT MANAGEMENT TABS ===== -->
+            <div class="segmented-control">
+                <button class="tab-btn active" onclick="window.location.href='mystra-document-portal.html'">📤 Upload</button>
+                <button class="tab-btn" onclick="window.location.href='mystra-mydocuments.html'">📋 My Documents</button>
+                <button class="tab-btn" onclick="window.location.href='mystra-location.html'">📍 Location</button>
+            </div>
+
+            <!-- ==========================================================================
+            📄 TAB 1: UPLOAD DOCUMENT (UC-M3-01)
+            ========================================================================== -->
+            <div id="doc-upload-panel" class="tab-panel">
+                <div class="widget-card">
+                    <h2>📄 Upload Compliance Document</h2>
+                    <p style="color: #6B7280; margin-bottom: 20px;">
+                        Upload your business license, safety certificate, or tax information file.
+                        All documents will be reviewed by government administrators.
+                    </p>
+
+                    <!-- Property Information Card -->
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #E5E7EB;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+                            <span style="color: #6B7280;">Property Title:</span>
+                            <span style="font-weight: 600; font-family: monospace;" id="upload-property-id">-</span>
+                            <span style="color: #6B7280;">Address:</span>
+                            <span style="font-weight: 500;" id="upload-property-address">Loading...</span>
+                            <span style="color: #6B7280;">Your Status:</span>
+                            <span id="user-verification-status" class="badge-pending">⏳ Checking...</span>
+                        </div>
+                    </div>
+
+                    <!-- Upload Form -->
+                    <form id="document-upload-form" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Document Type -->
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px;">
+                                Document Type <span style="color: #EF4444;">*</span>
+                            </label>
+                            <select id="doc-type-select" style="width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; background: white; font-size: 14px;">
+                                <option value="SSM Certificate">📜 SSM Certificate</option>
+                                <option value="Tax Information File">💲 Tax Information File</option>
+                                <option value="Safety Certificate">🛡️ Safety Certificate</option>
+                                <option value="Municipal Permit">🏛️ Municipal Permit</option>
+                                <option value="Business License">📋 Business License</option>
+                                <option value="Other">📎 Other</option>
+                            </select>
+                        </div>
+                        
+                        <div id="document-name-container" style="display: none;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px;">
+                                Document Name <span style="color: #EF4444;">*</span>
+                            </label>
+                        <input type="text" id="doc-name-input" placeholder="e.g., Custom Document Name" 
+                                style="width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 14px;">
+                        <p style="font-size: 12px; color: #6B7280; margin-top: 4px;">
+                                Give your custom document a meaningful name for easy identification.
+                        </p>
+                        </div>
+
+                        <!-- File Input -->
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px;">
+                                File <span style="color: #EF4444;">*</span>
+                            </label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="doc-file-input" accept=".pdf,.jpg,.jpeg,.png" required>
+                            </div>
+                            <p style="font-size: 12px; color: #6B7280; margin-top: 4px;">
+                                Supported: PDF, JPEG, PNG • Max size: 10MB
+                            </p>
+                        </div>
+
+                        <!-- GPS Status -->
+                        <div id="gps-status" style="padding: 16px; border-radius: 8px; background: #F8FAFC; border: 1px solid #E5E7EB;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <span style="font-weight: 500;">📍 Location Registry</span>
+                                <span id="gps-status-badge" class="badge-pending">⏳ Detecting...</span>
+                            </div>
+                            <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 13px; color: #6B7280; flex-wrap: wrap;">
+                                <span id="gps-coords">Lat: --, Lng: --</span>
+                                <span id="gps-distance">Distance: --</span>
+                            </div>
+                            <div id="gps-message" style="font-size: 13px; margin-top: 4px; color: #6B7280;"></div>
+                        </div>
+
+                        <!-- Upload Button -->
+                        <button type="submit" class="btn-primary" style="padding: 14px; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            📤 Upload Document
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+           
+
+
+</body>
+</html>
