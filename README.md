@@ -1,7 +1,7 @@
 ﻿# Academic projects â€” Tiong Chang Vui
 
 Final-year Software Engineering (Honours) student at Tunku Abdul Rahman University of
-Management and Technology (TAR UMT), Malaysia. CGPA 3.59, Dean's List (2 semesters).
+Management and Technology (TAR UMT), Malaysia. CGPA 3.5920, Dean's List (2 semesters).
 
 This repository collects the coursework I am allowed to publish. Everything here was built
 for a university course; model weights and datasets are left out because of their size.
