@@ -11,7 +11,7 @@ for a university course; model weights and datasets are left out because of thei
 | 1 | [MySTRA web application](01-mystra-web-app) | Collaborative Development | Multi-role web app, document workflow, data migration |
 | 2 | [Obesity level prediction](02-data-science-obesity) | BMDS2003 Data Science | Data cleaning, feature encoding, model comparison |
 | 3 | [Brain tumour MRI classification](03-ai-brain-tumour) | Artificial Intelligence | Transfer learning, evaluation, Streamlit demo |
-| 4 | [CarGrow blockchain escrow design](05-blockchain-cargrow) | Blockchain Application Development | Smart contract rules, escrow design, business case |
+| 4 | [CarGrow blockchain escrow](05-blockchain-cargrow) | Blockchain Application Development | Solidity contract, Hardhat dApp, milestone payouts |
 
 ## What each project shows
 
